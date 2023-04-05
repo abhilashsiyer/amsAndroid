@@ -6,5 +6,8 @@ import lombok.Data;
 public class UploadImageResp {
     public String message;
     public String validationResult;
-//    public String resultUrl;
+    public String url;
+    public String image;
+    public String diff;
+
 }

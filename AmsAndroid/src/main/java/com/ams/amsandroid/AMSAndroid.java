@@ -216,9 +216,22 @@ public class AMSAndroid implements AMS {
 
     @Override
     public void verifyPage(String tagName, String testName){
-            imageValidator.verifyPage(getApplicationContext(),tagName,this.project, this.branch,testName,
-                    this.testMatrixId);
+        int statusBarHeight = getNotificationBarHeight(getApplicationContext());
+
+        imageValidator.verifyPage(getApplicationContext(),mDevice, tagName,this.project,
+                this.branch,testName, this.testMatrixId,statusBarHeight );
     }
+
+    private static int getNotificationBarHeight(Context context) {
+        int statusBarHeight = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height",
+                "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return statusBarHeight;
+    }
+
 
     @Override
     public void end(TestName testName) {

@@ -26,9 +26,29 @@ public class UiObjectActions {
         }
     }
 
-    public void click(UiObject2 object, String packageName, String identifier) throws UiObjectNotClickable {
+    public void click(UiObject2 object, String packageName, String identifier) {
         if (object.isClickable()) {
             object.click();
+        } else {
+            uiObjectNotClickable("No matching element found for package "
+                    + packageName +" with identifier "+ identifier);
+        }
+    }
+
+    public void enterText(UiObject2 object, String textIdentifier, String textToEnter)  {
+        if (object.isClickable()) {
+            object.clear();
+            object.setText(textToEnter);
+        } else {
+            uiObjectNotClickable("Element not clickable "+textIdentifier);
+        }
+    }
+
+    public void enterText(UiObject2 object, String packageName, String identifier,
+                          String textToEnter) {
+        if (object.isClickable()) {
+            object.clear();
+            object.setText(textToEnter);
         } else {
             uiObjectNotClickable("No matching element found for package "
                     + packageName +" with identifier "+ identifier);

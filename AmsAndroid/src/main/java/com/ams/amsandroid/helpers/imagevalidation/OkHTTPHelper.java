@@ -17,7 +17,7 @@ public class OkHTTPHelper {
 
     public Response visualValidate(File file, String tagName, String testName, String project,
                                    String branchName, String baseFileUrl, String testMatrixId,
-                                   String deviceModel) throws IOException {
+                                   String deviceModel) {
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -42,13 +42,18 @@ public class OkHTTPHelper {
                 .url("https://sampleuiautomator.ts.r.appspot.com/visual-validate/")
                 .method("POST", requestBody)
                 .build();
-        Response response = client.newCall(request).execute();
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return response;
     }
 
     public Response getBaseFileUrl(String tagName, String project, String testCaseName,
-                                   String branch, String model) throws IOException {
+                                   String branch, String model) throws IOException{
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -64,18 +69,8 @@ public class OkHTTPHelper {
                 .url(HOST_NAME+"/get_base_file_url/")
                 .method("POST", requestBody)
                 .build();
-        Response response = client.newCall(request).execute();
-        return response;
-    }
-
-    public Response getTaskStatus(File fileToPost, String taskID) throws IOException {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        Request request = new Request.Builder()
-                .url(HOST_NAME+"/tasks/"+taskID)
-                .method("GET", null)
-                .build();
-        Response response = client.newCall(request).execute();
+        Response response = null;
+            response = client.newCall(request).execute();
         return response;
     }
 }

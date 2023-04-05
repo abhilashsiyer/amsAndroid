@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import org.junit.rules.TestName;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -61,6 +62,7 @@ public class AMSAndroid implements AMS {
         this.packageName = packageName;
         // Start from the home screen
         mDevice.pressHome();
+
         // Wait for device launcher
         final String launcherPackage = getLauncherPackageName();
         assertThat(launcherPackage, notNullValue());
@@ -71,9 +73,70 @@ public class AMSAndroid implements AMS {
         final Intent intent = context.getPackageManager()
                 .getLaunchIntentForPackage(this.packageName);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);    // Clear out any previous instances
+        clearApplicationData(context);
+
         context.startActivity(intent);
         // Wait for the app to appear
         mDevice.wait(Until.hasObject(By.pkg(this.packageName).depth(0)), LAUNCH_TIMEOUT);
+    }
+
+    public void launchAppUsingShell(String packageName, String activityName) {
+
+        mDevice.pressHome();
+
+        // Wait for device launcher
+        final String launcherPackage = getLauncherPackageName();
+        assertThat(launcherPackage, notNullValue());
+        mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), LAUNCH_TIMEOUT);
+
+        // Clear app data
+            try {
+                mDevice.executeShellCommand("pm clear "+packageName);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                // Launch app
+                mDevice.executeShellCommand("am start -n "+packageName+"/"+activityName);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+         }
+
+
+    private static void clearApplicationData(Context context) {
+        File cache = context.getCacheDir();
+        File appDir = new File(cache.getParent());
+        if (appDir.exists()) {
+            String[] children = appDir.list();
+            for (String s : children) {
+                if (!s.equals("lib")) {
+                    deleteDir(new File(appDir, s));
+                }
+            }
+        }
+    }
+
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String aChildren : children) {
+                boolean success = deleteDir(new File(dir, aChildren));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else {
+            return dir != null && dir.isFile() && dir.delete();
+        }
     }
 
     public void clickById(int resId) {
@@ -126,8 +189,23 @@ public class AMSAndroid implements AMS {
     }
 
     @Override
-    public void enterTextAtId(String valueToMatch, int resId) {
+    public void enterTextAtId(String textToEnter, int resId) {
+        String resourceId = getApplicationContext().getResources().getResourceEntryName(resId);
 
+        uiObjectActions.enterText(uiObjectFinder.findObjectByResourceId(mDevice,packageName,resourceId),
+                packageName,resourceId,textToEnter);
+    }
+
+    @Override
+    public void enterTextAtId(String textToEnter, String identifier) {
+        uiObjectActions.enterText(uiObjectFinder.findObjectByResourceId(mDevice,packageName,identifier),
+                packageName,identifier,textToEnter);
+    }
+
+    @Override
+    public void enterTextAtId(String textToEnter, String pkgName, String identifier) {
+        uiObjectActions.enterText(uiObjectFinder.findObjectByResourceId(mDevice,pkgName,identifier),
+                pkgName,identifier,textToEnter);
     }
 
     @Override
@@ -138,8 +216,8 @@ public class AMSAndroid implements AMS {
 
     @Override
     public void verifyPage(String tagName, String testName){
-        imageValidator.verifyPage(mDevice,tagName,this.project, this.branch,testName,
-                this.testMatrixId);
+            imageValidator.verifyPage(getApplicationContext(),tagName,this.project, this.branch,testName,
+                    this.testMatrixId);
     }
 
     @Override

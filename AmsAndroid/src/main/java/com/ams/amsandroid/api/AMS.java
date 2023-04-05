@@ -4,6 +4,8 @@ import org.junit.rules.TestName;
 
 public interface AMS {
     void launchApp(String pkgName);
+
+    void launchAppUsingShell(String pkgName, String activityName);
     void clickById(String identifier);
     void clickById(int resId);
     void clickById(String pkgName, String identifier);
@@ -15,5 +17,7 @@ public interface AMS {
     void verifyTextIsVisibleAtId(String valueToMatch, int resId);
     void verifyTextIsVisibleAtId(String resourceId, String pkgName, String valueToMatch);
     void enterTextAtId(String textToEnter, int resId);
+    void enterTextAtId(String textToEnter, String identifier);
+    void enterTextAtId(String textToEnter, String pkgName, String identifier);
     void end(TestName testName);
 }

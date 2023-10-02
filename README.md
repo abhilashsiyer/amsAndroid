@@ -11,6 +11,7 @@ amsAndroid is a simplified implementation of uiAutomator lib, allowing you to wr
 
 - `clickById(String pkgName, String identifier);`
 - `clickByText(String textIdentifier);`
+- `enterTextAtId(String textToEnter, int resId);`
 - `launchApp(String pkgName);`
 
 without worrying about waiting for the element to be visible or any setup.
